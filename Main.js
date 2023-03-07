@@ -17,6 +17,7 @@ const express = require("express"),
 // Global Variable
 const saltRound = 10;
 
+const { response } = require("express");
 // InBuilt Module
 const path = require("path");
 
@@ -123,6 +124,42 @@ app.get("/Signup", (request, response) => {
   }
 });
 
+app.get(
+  "/Home",
+  connectEnsure.ensureLoggedIn({ redirectTo: "/" }),
+  async (request, response) => {
+    try {
+      let findUser = await User.findByPk(request.user.id);
+      console.log(findUser);
+      response.render("Home", {
+        csrfToken: request.csrfToken(),
+        findUser,
+      });
+    } catch (error) {
+      console.log("Error:" + error);
+      response.status(402).send(error);
+    }
+  }
+);
+
+app.get(
+  "/Signout",
+  connectEnsure.ensureLoggedIn({ redirectTo: "/" }),
+  (request, response) => {
+    try {
+      request.logout((err) => {
+        if (err) {
+          return next(err);
+        }
+        request.flash("success", "Signout Successfully");
+        response.redirect("/");
+      });
+    } catch (error) {
+      console.log("Error:" + error);
+      response.status(402).send(error);
+    }
+  }
+);
 // Post Request
 app.post("/SignUpUser", async (request, response) => {
   try {
@@ -140,7 +177,7 @@ app.post("/SignUpUser", async (request, response) => {
         console.log(err);
       }
       request.flash("success", "User Suceessfully Created");
-      return response.redirect("/");
+      return response.redirect("/Home");
     });
   } catch (error) {
     console.log(error);
@@ -153,10 +190,23 @@ app.post(
   passport.authenticate("local", { failureFlash: true, failureRedirect: "/" }),
   (request, response) => {
     try {
-      response.redirect("/");
+      response.redirect("/Home");
     } catch (error) {
       console.log("Error:" + error);
       response.send(error);
+    }
+  }
+);
+
+app.post(
+  "/AddAppointment",
+  connectEnsure.ensureLoggedIn({ redirectTo: "/" }),
+  async (request, response) => {
+    try {
+      console.log(request.body);
+    } catch (error) {
+      console.log("Erorr:" + error);
+      response.status(402).send(error);
     }
   }
 );
