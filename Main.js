@@ -17,7 +17,7 @@ const express = require("express"),
 // Global Variable
 const saltRound = 10;
 
-const { response } = require("express");
+const { request, response } = require("express");
 // InBuilt Module
 const path = require("path");
 
@@ -25,7 +25,8 @@ const path = require("path");
 const { sequelize } = require("./models"),
   DataTypes = require("sequelize");
 
-const User = require("./models/user")(sequelize, DataTypes);
+const User = require("./models/user")(sequelize, DataTypes),
+  Appoitment = require("./models/appointment")(sequelize, DataTypes);
 
 // Setup View Engine And Path of Views
 app.set("view engine", "ejs");
@@ -125,15 +126,22 @@ app.get("/Signup", (request, response) => {
 });
 
 app.get(
-  "/Home",
+  "/Login/Home",
   connectEnsure.ensureLoggedIn({ redirectTo: "/" }),
   async (request, response) => {
     try {
       let findUser = await User.findByPk(request.user.id);
+      let getAppointment = await Appoitment.getAppointmentList(request.user.id);
+      let completedAppointment = await Appoitment.getCompletedAppointment(
+        request.user.id
+      );
+      console.log(getAppointment);
       console.log(findUser);
       response.render("Home", {
         csrfToken: request.csrfToken(),
         findUser,
+        getAppointment,
+        completedAppointment,
       });
     } catch (error) {
       console.log("Error:" + error);
@@ -142,6 +150,22 @@ app.get(
   }
 );
 
+app.get(
+  "/AddAppointment",
+  connectEnsure.ensureLoggedIn({ redirectTo: "/" }),
+  (request, response) => {
+    try {
+      let UserDetail = request.user;
+      response.render("AddAppointment", {
+        csrfToken: request.csrfToken(),
+        UserDetail,
+      });
+    } catch (error) {
+      console.log("Error:" + error);
+      response.status(402).send(error);
+    }
+  }
+);
 app.get(
   "/Signout",
   connectEnsure.ensureLoggedIn({ redirectTo: "/" }),
@@ -177,7 +201,7 @@ app.post("/SignUpUser", async (request, response) => {
         console.log(err);
       }
       request.flash("success", "User Suceessfully Created");
-      return response.redirect("/Home");
+      return response.redirect("/Login/Home");
     });
   } catch (error) {
     console.log(error);
@@ -190,7 +214,7 @@ app.post(
   passport.authenticate("local", { failureFlash: true, failureRedirect: "/" }),
   (request, response) => {
     try {
-      response.redirect("/Home");
+      response.redirect("/Login/Home");
     } catch (error) {
       console.log("Error:" + error);
       response.send(error);
@@ -199,13 +223,80 @@ app.post(
 );
 
 app.post(
-  "/AddAppointment",
+  "/NewAppointment/:id",
   connectEnsure.ensureLoggedIn({ redirectTo: "/" }),
   async (request, response) => {
     try {
       console.log(request.body);
+      console.log(request.params.id);
+
+      if (request.body.S_Time != request.body.E_Time) {
+        let addNewAppointment = await Appoitment.create({
+          Title: request.body.title,
+          userId: request.user.id,
+          Starting: request.body.S_Time,
+          Ending: request.body.E_Time,
+          Status: false,
+          Appintment_Date: request.body.Date,
+        });
+        console.log(addNewAppointment);
+        request.flash("success", "Created Successfully");
+        response.redirect("/Login/Home");
+      } else {
+        request.flash("error", "Please Enter Different Time");
+        response.redirect("back");
+      }
     } catch (error) {
       console.log("Erorr:" + error);
+      response.status(402).send(error);
+    }
+  }
+);
+
+// Delete Request
+
+app.delete(
+  "/Appointment/Delete/:id",
+  connectEnsure.ensureLoggedIn({ redirectTo: "/" }),
+  async (request, response) => {
+    try {
+      let deleteAppointment = await Appoitment.removeAppointment(
+        request.params.id,
+        request.user.id
+      );
+      // console.log(deleteAppointment ? true : false);
+      if (deleteAppointment ? true : false) {
+        request.flash("success", "Successfully Deleted");
+      } else {
+        request.flash("error", "Failed To Delete");
+      }
+      return response.send(deleteAppointment ? true : false);
+    } catch (error) {
+      console.log("Error:" + error);
+      response.status(402).send(error);
+    }
+  }
+);
+
+// Put Request
+
+app.put(
+  "/Update/Appointment/:id",
+  connectEnsure.ensureLoggedIn({ redirectTo: "/" }),
+  async (request, response) => {
+    const updateAppointment = await Appoitment.findByPk(request.params.id);
+    try {
+      let Status = !updateAppointment.Status;
+      let NewAppointmentStatus = await updateAppointment.UpdateAppointment(
+        Status
+      );
+      console.log(NewAppointmentStatus);
+      if (NewAppointmentStatus ? true : false) {
+        request.flash("success", "Successfully Updated");
+      }
+      return response.send(NewAppointmentStatus ? true : false);
+    } catch (error) {
+      console.log("Error:" + error);
       response.status(402).send(error);
     }
   }

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="csrf-token" content="<%= csrfToken %>" />
+    <title>AddAppointment</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body>
+    <div class="flex items-center justify-center p-12">
+      <div class="mx-auto w-full max-w-[550px]">
+        <% if(messages && messages.error && messages.error.length != 0) { %>
+        <div
+          style="
+            background-color: #fee2e2;
+            border-color: #f87171;
+            color: #ef4444;
+            border-radius: 3px;
+            position: relative;
+            padding: 10px;
+            text-align: center;
+            margin-bottom: 20px;
+          "
+          role="alert"
+        >
+          <strong> <%=messages.error %> </strong>
+        </div>
+        <% } %> <% if(messages && messages.success && messages.success.length !=
+        0) { %>
+        <div
+          style="
+            background-color: #ecfccb;
+            border-color: #a3e635;
+            color: #84cc16;
+            border-radius: 3px;
+            position: relative;
+            padding: 10px;
+            text-align: center;
+            margin-bottom: 20px;
+          "
+          role="alert"
+        >
+          <strong> <%=messages.success %> </strong>
+        </div>
+        <% } %>
+        <form action="/NewAppointment/<%=UserDetail.id%>" method="POST">
+          <input type="hidden" name="_csrf" value="<%= csrfToken%>" />
+          <div class="mb-5">
+            <label
+              for="title"
+              class="mb-3 block text-base font-medium text-[#07074D]"
+            >
+              Appointment Title
+            </label>
+            <input
+              type="text"
+              name="title"
+              id="title"
+              placeholder="Enter Your Appointment Title"
+              class="w-full rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md"
+            />
+          </div>
+          <div class="mb-5">
+            <label
+              for="S-Time"
+              class="mb-3 block text-base font-medium text-[#07074D]"
+            >
+              Starting Time
+            </label>
+            <input
+              type="time"
+              name="S_Time"
+              id="S-Time"
+              class="rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md"
+            />
+          </div>
+          <div class="mb-5">
+            <label
+              for="E-Time"
+              class="mb-3 block text-base font-medium text-[#07074D]"
+            >
+              Ending Time
+            </label>
+            <input
+              type="time"
+              name="E_Time"
+              id="E-Time"
+              class="rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md"
+            />
+          </div>
+          <div class="mb-5">
+            <label
+              for="date-local"
+              class="mb-3 block text-base font-medium text-[#07074D]"
+            >
+              Date:
+            </label>
+            <input
+              type="date"
+              name="Date"
+              id="date"
+              class="rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md"
+            />
+          </div>
+          <div>
+            <button
+              class="hover:shadow-xl duration-500 rounded-md bg-[#4ade80] py-3 px-8 text-xl font-semibold text-white outline-none"
+            >
+              Submit
+            </button>
+            <button
+              class="mx-10 hover:shadow-xl duration-500 rounded-md bg-[#f87171] py-3 px-8 font-semibold text-white outline-none text-xl text-center"
+            >
+              <a href="/Login/Home"
+                ><span class="text-2xl text-center">&#8592;</span> Go Back</a
+              >
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+    <script type="text/javascript">
+      function setDate() {
+        let TodayDate = new Date();
+
+        let month = TodayDate.getMonth() + 1;
+        let day = TodayDate.getDate();
+        let year = TodayDate.getFullYear();
+        if (month < 10) {
+          month = "0" + month.toString();
+        }
+        if (day < 10) {
+          day = "0" + day.toString();
+        }
+        let maxDate = year + "-" + month + "-" + day;
+        document.querySelector("#date").setAttribute("min", maxDate);
+      }
+      setDate();
+    </script>
+  </body>
+</html>

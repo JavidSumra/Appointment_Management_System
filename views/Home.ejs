@@ -4,10 +4,362 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="csrf-token" content="<%= csrfToken %>" />
     <title>Home</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      .container {
+        width: 1400px;
+        height: 650px;
+      }
+
+      .app-color-blue-1 {
+        color: #346ee1;
+      }
+
+      .app-color-blue-3 {
+        color: #a0b4d6;
+      }
+
+      .app-color-black {
+        color: #3e4350;
+      }
+
+      .app-color-gray-1 {
+        color: #949aa7;
+      }
+
+      .app-color-red {
+        color: #949aa7;
+      }
+
+      .app-bg-blue-1 {
+        background: #346ee1;
+      }
+
+      .app-bg-blue-2 {
+        background: #f5f9fc;
+      }
+
+      .app-button-shadow {
+        box-shadow: 0px 5px 10px 0px rgb(145 167 210 / 25%);
+      }
+
+      .app-bg-gray-1 {
+        background: #949aa7;
+      }
+
+      .app-bg-blue-3 {
+        background: #4a7ae5;
+      }
+
+      .app-bg-blue-4 {
+        background: #518aea;
+      }
+
+      .app-bg-white-1 {
+        background: #f4f8f9;
+      }
+
+      .app-color-yellow-1 {
+        color: #d7ac67;
+      }
+
+      .app-bg-yellow-2 {
+        background: #fff9eb;
+      }
+
+      .app-bg-yellow-3 {
+        background: #ffbe4e;
+      }
+
+      .app-border-1 {
+        border: 1px solid #f4f6f9;
+      }
+
+      .app-color-red-1 {
+        color: #e0899c;
+      }
+
+      .app-bg-red-2 {
+        background: #fef5f6;
+      }
+
+      .app-color-green {
+        color: #0cbda8;
+      }
+
+      .active {
+        position: relative;
+        box-shadow: 6px -6px 11px 0 rgb(0 0 0 / 8%);
+      }
+
+      .active::before {
+        position: absolute;
+        content: "";
+        width: 4px;
+        height: 55%;
+        background-color: #346ee1;
+        top: 20px;
+        left: 0;
+      }
+    </style>
   </head>
   <body>
     <%-include ("Navigation")%>
+    <div class="mx-10">
+      <div class="flex flex-row">
+        <div
+          class="flex flex-col w-40 bg-white pl-5 py-3 mr-3 rounded-tl-2xl rounded-tr-2xl bg-white active"
+        >
+          <span class="text-3xl app-color-blue-1 font-bold"
+            ><%=getAppointment.length%></span
+          >
+          <span class="text-md app-color-blue-1 font-semibold">Total</span>
+        </div>
+        <div
+          class="flex flex-col w-40 bg-white pl-5 py-3 mr-3 rounded-tl-2xl rounded-tr-2xl bg-white active"
+        >
+          <span class="text-3xl app-color-blue-1 font-bold"
+            ><%=completedAppointment.length%></span
+          >
+          <span class="text-md app-color-blue-1 font-semibold">Completed</span>
+        </div>
+      </div>
+      <div class="flex flex-row p-10 relative bg-gray-50 rounded">
+        <div
+          class="absolute app-bg-yellow-3 text-xs font-semibold px-3 py-0.5 rounded-br-md rounded-tl-md text-white"
+          style="top: 76px"
+        >
+          New
+        </div>
+        <table class="w-full">
+          <thead>
+            <tr>
+              <th></th>
+              <th></th>
+              <th class="text-left text-xl app-color-black pb-5">
+                Appointment Title
+              </th>
+              <th class="text-left text-xl app-color-black pb-5">
+                Starting Time
+              </th>
+              <th class="text-left text-xl app-color-black pb-5">
+                Ending Time
+              </th>
+              <th class="text-left text-xl app-color-black pb-5">Status</th>
+              <th></th>
+              <th></th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <% for (let i = 0; i < getAppointment.length;i++) { %>
+            <tr class="app-border-1">
+              <td></td>
+              <td>
+                <div
+                  class="number flex justify-center items-center rounded-md w-8 h-8 app-bg-yellow-2 app-color-yellow-1 text-xl font-semibold"
+                >
+                  <%=i+1%>
+                </div>
+              </td>
+              <td>
+                <div class="flex flex-row py-3">
+                  <div class="flex flex-col">
+                    <span class="font-semibold text-xl app-color-black"
+                      ><%=getAppointment[i].Title%></span
+                    >
+                  </div>
+                </div>
+              </td>
+              <td>
+                <span class="font-semibold text-xl app-color-gray-1"
+                  ><%=getAppointment[i].Starting%></span
+                >
+              </td>
+              <td>
+                <span class="font-semibold text-xl app-color-gray-1"
+                  ><%=getAppointment[i].Ending%></span
+                >
+              </td>
+              <td>
+                <span class="font-semibold text-xl app-color-gray-1"
+                  ><%=getAppointment[i].Status%></span
+                >
+              </td>
+              <td>
+                <% if(getAppointment[i].Status != true) { %>
+                <button
+                  onclick="completeAppointment(<%=getAppointment[i].id%>)"
+                  class="mx-0 flex items-center justify-center app-button-shadow w-32 py-2 rounded-3xl"
+                >
+                  <svg
+                    style="color: rgb(57, 243, 61)"
+                    xmlns="http://www.w3.org/2000/svg"
+                    xmlns:xlink="http://www.w3.org/1999/xlink"
+                    zoomAndPan="magnify"
+                    viewBox="0 0 30 30.000001"
+                    width="20"
+                    height="20"
+                    preserveAspectRatio="xMidYMid meet"
+                    version="1.0"
+                  >
+                    <defs>
+                      <clipPath id="id1">
+                        <path
+                          d="M 2.328125 4.222656 L 27.734375 4.222656 L 27.734375 24.542969 L 2.328125 24.542969 Z M 2.328125 4.222656 "
+                          clip-rule="nonzero"
+                          fill="#39f33d"
+                        ></path>
+                      </clipPath>
+                    </defs>
+                    <g clip-path="url(#id1)">
+                      <path
+                        fill="#39f33d"
+                        d="M 27.5 7.53125 L 24.464844 4.542969 C 24.15625 4.238281 23.65625 4.238281 23.347656 4.542969 L 11.035156 16.667969 L 6.824219 12.523438 C 6.527344 12.230469 6 12.230469 5.703125 12.523438 L 2.640625 15.539062 C 2.332031 15.84375 2.332031 16.335938 2.640625 16.640625 L 10.445312 24.324219 C 10.59375 24.472656 10.796875 24.554688 11.007812 24.554688 C 11.214844 24.554688 11.417969 24.472656 11.566406 24.324219 L 27.5 8.632812 C 27.648438 8.488281 27.734375 8.289062 27.734375 8.082031 C 27.734375 7.875 27.648438 7.679688 27.5 7.53125 Z M 27.5 7.53125 "
+                        fill-opacity="1"
+                        fill-rule="nonzero"
+                      ></path>
+                    </g>
+                  </svg>
+                  <span class="ml-3 font-semibold text-md app-color-gray-1"
+                    >Complete</span
+                  >
+                </button>
+                <% } else{%>
+                <button
+                  onclick="completeAppointment(<%=getAppointment[i].id%>)"
+                  class="mx-0 flex items-center justify-center app-button-shadow w-32 py-2 rounded-3xl"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    height="16"
+                    width="16"
+                  >
+                    <g>
+                      <path fill="none" d="M0 0h24v24H0z" />
+                      <path
+                        d="M12 10.586l4.95-4.95 1.414 1.414-4.95 4.95 4.95 4.95-1.414 1.414-4.95-4.95-4.95 4.95-1.414-1.414 4.95-4.95-4.95-4.95L7.05 5.636z"
+                      />
+                    </g>
+                  </svg>
+                  <span class="ml-3 font-semibold text-md app-color-gray-1"
+                    >Cancel</span
+                  >
+                </button>
+                <% } %>
+              </td>
+              <td>
+                <button
+                  onclick="deleteAppointment(<%=getAppointment[i].id%>)"
+                  class="mx-0 flex items-center justify-center app-button-shadow w-32 py-2 rounded-3xl"
+                >
+                  <svg
+                    style="color: #ff0000"
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    fill="currentColor"
+                    class="bi bi-trash"
+                    viewBox="0 0 16 16"
+                  >
+                    <path
+                      d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"
+                      fill="red"
+                    ></path>
+                    <path
+                      fill-rule="evenodd"
+                      d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"
+                      fill="red"
+                    ></path>
+                  </svg>
+                  <span class="ml-3 font-semibold text-md app-color-gray-1"
+                    >Delete</span
+                  >
+                </button>
+              </td>
+              <td>
+                <button
+                  class="mx-0 flex items-center justify-center app-button-shadow w-32 py-2 rounded-3xl"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    fill="currentColor"
+                    class="bi bi-pencil-square"
+                    viewBox="0 0 16 16"
+                  >
+                    <path
+                      d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"
+                    />
+                    <path
+                      fill-rule="evenodd"
+                      d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"
+                    />
+                  </svg>
+                  <span class="ml-3 font-semibold text-md app-color-gray-1"
+                    >Edit</span
+                  >
+                </button>
+              </td>
+            </tr>
+            <tr class="app-border-1">
+              <td class="w-6 h-6">
+                <svg
+                  class="ml-3 w-6 h-6 app-color-blue-3 mr-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                ></svg>
+              </td>
+            </tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <script>
+      let token = document
+        .querySelector('meta[name="csrf-token"]')
+        .getAttribute("content");
+      const deleteAppointment = (id) => {
+        fetch(`/Appointment/Delete/${id}`, {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            _csrf: token,
+          }),
+        })
+          .then((res) => {
+            if (res.ok) {
+              window.location.reload();
+            } else {
+              console.log(res.ok);
+            }
+          })
+          .catch((err) => console.log(err));
+      };
+      const completeAppointment = (id) => {
+        fetch(`/Update/Appointment/${id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            _csrf: token,
+          }),
+        })
+          .then((res) => {
+            if (res.ok) {
+              window.location.reload();
+            } else {
+              console.log(res.ok);
+            }
+          })
+          .catch((err) => console.log(err));
+      };
+    </script>
   </body>
 </html>
