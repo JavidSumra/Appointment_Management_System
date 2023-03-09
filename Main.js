@@ -153,12 +153,14 @@ app.get(
 app.get(
   "/AddAppointment",
   connectEnsure.ensureLoggedIn({ redirectTo: "/" }),
-  (request, response) => {
+  async (request, response) => {
     try {
       let UserDetail = request.user;
+      let getAppointment = await Appoitment.getAppointmentList(request.user.id);
       response.render("AddAppointment", {
         csrfToken: request.csrfToken(),
         UserDetail,
+        getAppointment,
       });
     } catch (error) {
       console.log("Error:" + error);

@@ -127,6 +127,7 @@
         </div>
       </div>
       <div class="flex flex-row p-10 relative bg-gray-50 rounded">
+        <%if(getAppointment.length != 0){%>
         <div
           class="absolute app-bg-yellow-3 text-xs font-semibold px-3 py-0.5 rounded-br-md rounded-tl-md text-white"
           style="top: 76px"
@@ -320,6 +321,13 @@
             <% } %>
           </tbody>
         </table>
+        <%} else { %>
+        <div
+          class="flex justify-center items-center w-full text-2xl font-medium"
+        >
+          Appointment Not Scheduled Yet!
+        </div>
+        <%}%>
       </div>
     </div>
     <script>

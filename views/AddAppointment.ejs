@@ -5,139 +5,311 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="csrf-token" content="<%= csrfToken %>" />
-    <title>AddAppointment</title>
+    <title>Add Appointment</title>
     <script src="https://cdn.tailwindcss.com"></script>
   </head>
   <body>
-    <div class="flex items-center justify-center p-12">
-      <div class="mx-auto w-full max-w-[550px]">
-        <% if(messages && messages.error && messages.error.length != 0) { %>
-        <div
-          style="
-            background-color: #fee2e2;
-            border-color: #f87171;
-            color: #ef4444;
-            border-radius: 3px;
-            position: relative;
-            padding: 10px;
-            text-align: center;
-            margin-bottom: 20px;
-          "
-          role="alert"
-        >
-          <strong> <%=messages.error %> </strong>
-        </div>
-        <% } %> <% if(messages && messages.success && messages.success.length !=
-        0) { %>
-        <div
-          style="
-            background-color: #ecfccb;
-            border-color: #a3e635;
-            color: #84cc16;
-            border-radius: 3px;
-            position: relative;
-            padding: 10px;
-            text-align: center;
-            margin-bottom: 20px;
-          "
-          role="alert"
-        >
-          <strong> <%=messages.success %> </strong>
-        </div>
-        <% } %>
-        <form action="/NewAppointment/<%=UserDetail.id%>" method="POST">
-          <input type="hidden" name="_csrf" value="<%= csrfToken%>" />
-          <div class="mb-5">
-            <label
-              for="title"
-              class="mb-3 block text-base font-medium text-[#07074D]"
+    <div class="flex items-center justify-center py-8 px-4">
+      <div class="max-w-sm w-full shadow-lg">
+        <div class="md:p-8 p-5 dark:bg-gray-800 bg-white rounded-t">
+          <div class="px-4 flex items-center justify-between">
+            <span
+              tabindex="0"
+              class="month focus:outline-none text-base font-bold dark:text-gray-100 text-gray-800"
+              >October 2020</span
             >
-              Appointment Title
-            </label>
-            <input
-              type="text"
-              name="title"
-              id="title"
-              placeholder="Enter Your Appointment Title"
-              class="w-full rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md"
-            />
-          </div>
-          <div class="mb-5">
-            <label
-              for="S-Time"
-              class="mb-3 block text-base font-medium text-[#07074D]"
-            >
-              Starting Time
-            </label>
-            <input
-              type="time"
-              name="S_Time"
-              id="S-Time"
-              class="rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md"
-            />
-          </div>
-          <div class="mb-5">
-            <label
-              for="E-Time"
-              class="mb-3 block text-base font-medium text-[#07074D]"
-            >
-              Ending Time
-            </label>
-            <input
-              type="time"
-              name="E_Time"
-              id="E-Time"
-              class="rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md"
-            />
-          </div>
-          <div class="mb-5">
-            <label
-              for="date-local"
-              class="mb-3 block text-base font-medium text-[#07074D]"
-            >
-              Date:
-            </label>
-            <input
-              type="date"
-              name="Date"
-              id="date"
-              class="rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md"
-            />
-          </div>
-          <div>
-            <button
-              class="hover:shadow-xl duration-500 rounded-md bg-[#4ade80] py-3 px-8 text-xl font-semibold text-white outline-none"
-            >
-              Submit
-            </button>
-            <button
-              class="mx-10 hover:shadow-xl duration-500 rounded-md bg-[#f87171] py-3 px-8 font-semibold text-white outline-none text-xl text-center"
-            >
-              <a href="/Login/Home"
-                ><span class="text-2xl text-center">&#8592;</span> Go Back</a
+            <div class="mover flex items-center">
+              <button
+                id="moveback"
+                aria-label="calendar backward"
+                class="focus:text-gray-400 hover:text-gray-400 text-gray-800 dark:text-gray-100"
               >
-            </button>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="icon icon-tabler icon-tabler-chevron-left"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  stroke-width="1.5"
+                  stroke="currentColor"
+                  fill="none"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                  <polyline points="15 6 9 12 15 18" />
+                </svg>
+              </button>
+              <button
+                aria-label="calendar forward"
+                class="focus:text-gray-400 hover:text-gray-400 ml-3 text-gray-800 dark:text-gray-100"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="icon icon-tabler icon-tabler-chevron-right"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  stroke-width="1.5"
+                  stroke="currentColor"
+                  fill="none"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                  <polyline points="9 6 15 12 9 18" />
+                </svg>
+              </button>
+            </div>
           </div>
-        </form>
+          <div class="day flex items-center justify-center">
+            <div class="px-2 py-2 cursor-pointer flex w-full justify-center">
+              <p class="text-base text-gray-500 dark:text-gray-100 font-medium">
+                Mon
+              </p>
+            </div>
+            <div class="px-2 py-2 cursor-pointer flex w-full justify-center">
+              <p class="text-base text-gray-500 dark:text-gray-100 font-medium">
+                Tue
+              </p>
+            </div>
+            <div class="px-2 py-2 cursor-pointer flex w-full justify-center">
+              <p class="text-base text-gray-500 dark:text-gray-100 font-medium">
+                Wed
+              </p>
+            </div>
+            <div class="px-2 py-2 cursor-pointer flex w-full justify-center">
+              <p class="text-base text-gray-500 dark:text-gray-100 font-medium">
+                Thu
+              </p>
+            </div>
+            <div class="px-2 py-2 cursor-pointer flex w-full justify-center">
+              <p class="text-base text-gray-500 dark:text-gray-100 font-medium">
+                Fri
+              </p>
+            </div>
+            <div class="px-2 py-2 cursor-pointer flex w-full justify-center">
+              <p class="text-base text-gray-500 dark:text-gray-100 font-medium">
+                Sat
+              </p>
+            </div>
+            <div class="px-2 py-2 cursor-pointer flex w-full justify-center">
+              <p class="text-base text-gray-500 dark:text-gray-100 font-medium">
+                Sun
+              </p>
+            </div>
+          </div>
+          <div class="dates grid grid-cols-7"></div>
+        </div>
+        <div
+          class="md:py-8 py-5 md:px-16 px-5 dark:bg-gray-700 bg-gray-50 rounded-b"
+        >
+          <div class="px-4">
+            <div class="Appointment duration-300">
+              <% if(getAppointment.length != 0) { %> <% for (let i = 0;i <
+              getAppointment.length ; i++ ) { %>
+              <div class="border-b pb-4 border-gray-400 border-dashed pt-5">
+                <p
+                  class="text-xs font-light leading-3 text-gray-500 dark:text-gray-300"
+                >
+                  <%=getAppointment.Starting%> - <%=getAppointment.Ending%>
+                </p>
+                <a
+                  tabindex="0"
+                  class="focus:outline-none text-lg font-medium leading-5 text-gray-800 dark:text-gray-100 mt-2"
+                  ><%=getAppointment.Title%></a
+                >
+              </div>
+              <% } %> <% } else {%>
+              <div class="flex text-center text-2xl font-medium">
+                No Appointment Today
+              </div>
+              <% } %>
+            </div>
+            <div class="addAppointment hidden duration-300">
+              <div class="overflow-hidden rounded bg-gray-900">
+                <div
+                  class="w-full h-12 flex items-center justify-between text-gray-800"
+                >
+                  <div class="text-xl font-medium mx-auto text-white">
+                    Create New Event
+                  </div>
+                </div>
+                <div class="w-full h-full flex flex-col p-5">
+                  <div class="w-full h-10 flex items-center justify-between">
+                    <input
+                      type="text"
+                      id="helper-text"
+                      aria-describedby="helper-text-explanation"
+                      class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                      placeholder="Appointment Name"
+                    />
+                  </div>
+                  <div
+                    class="w-full h-10 flex items-center justify-between my-5"
+                  >
+                    <input
+                      type="time"
+                      id="helper-text"
+                      aria-describedby="helper-text-explanation"
+                      class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                    />
+                  </div>
+                  <div class="w-full h-10 flex items-center justify-between">
+                    <input
+                      type="time"
+                      id="helper-text"
+                      aria-describedby="helper-text-explanation"
+                      class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                    />
+                  </div>
+                </div>
+                <div class="flex items-center justify-center p-5">
+                  <button
+                    class="p-2 text-center h-10 text-base font-medium bg-green-400 text-white rounded cursor-pointer hover:transparent"
+                  >
+                    Add Event
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <button class="add-event duration-300" onclick="changeDiv()">
+            <div class="mx-60 mt-5">
+              <svg
+                class="text-gray-900 bg-gray-400 rounded-full"
+                xmlns="http://www.w3.org/2000/svg"
+                width="45"
+                height="45"
+                fill="currentColor"
+                class="bi bi-plus"
+                viewBox="0 0 16 16"
+              >
+                <path
+                  d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"
+                  fill="#171717"
+                ></path>
+              </svg>
+            </div>
+          </button>
+        </div>
       </div>
     </div>
-    <script type="text/javascript">
-      function setDate() {
-        let TodayDate = new Date();
+    <script>
+      let Appointment = document.querySelector(".addAppointment"),
+        divAppointment = document.querySelector(".Appointment"),
+        rotate = true;
+      const changeDiv = () => {
+        divAppointment.classList.toggle("hidden");
+        Appointment.classList.toggle("hidden");
+        if (rotate) {
+          document.querySelector(".add-event").style.rotate = "45deg";
+          rotate = false;
+        } else {
+          document.querySelector(".add-event").style.rotate = "0deg";
+          rotate = true;
+        }
+      };
 
-        let month = TodayDate.getMonth() + 1;
-        let day = TodayDate.getDate();
-        let year = TodayDate.getFullYear();
-        if (month < 10) {
-          month = "0" + month.toString();
+      // Calendar
+      let month = document.querySelector(".month"),
+        i;
+      let dates = document.querySelector(".dates");
+
+      let date = new Date();
+      let currentMonth = date.getMonth();
+      let currentYear = date.getFullYear();
+      let span = " ";
+      let div = " ";
+
+      let arrofmonth = [
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
+      ];
+
+      const createCal = () => {
+        month.innerHTML = `${arrofmonth[date.getMonth()]} ${currentYear}`;
+        let firstdayofCurrentMonth = new Date(
+            currentYear,
+            currentMonth,
+            1
+          ).getDay(),
+          lastdateofCurrentMonth = new Date(
+            currentYear,
+            currentMonth + 1,
+            0
+          ).getDate(),
+          lastdayofCurrentMonth = new Date(
+            currentYear,
+            currentMonth,
+            lastdateofCurrentMonth
+          ).getDay(),
+          lastdateofMonth = new Date(currentYear, currentMonth, 0).getDate();
+        // console.log("First Day:" + firstdayofCurrentMonth);
+        // console.log("Last Day:" + lastdayofCurrentMonth);
+        // console.log("Last Date:" + lastdateofCurrentMonth);
+        // console.log("Last Date:" + lastdateofMonth);
+        for (i = firstdayofCurrentMonth; i > 0; i--) {
+          span += `<div class="px-2 py-2 cursor-pointer flex w-full justify-center">
+                                            <p class="text-base text-gray-500 dark:text-gray-100 font-medium">${
+                                              lastdateofMonth - i + 1
+                                            }</p>
+                                        </div>`;
+          // console.log(lastdateofMonth - i + 1);
         }
-        if (day < 10) {
-          day = "0" + day.toString();
+        for (i = 1; i <= lastdateofCurrentMonth; i++) {
+          let isToday =
+            i === date.getDate() &&
+            date.getMonth() === new Date().getMonth() &&
+            date.getFullYear() === new Date().getFullYear();
+
+          span += `<div class="px-2 py-2 cursor-pointer flex w-full justify-center">
+                                            <p ${
+                                              isToday
+                                                ? 'class="w-full h-full text-center text-base text-gray-900 font-medium bg-indigo-600 rounded-full"'
+                                                : 'class="text-base text-gray-900 dark:text-gray-100 font-medium"'
+                                            }>${i}</p>
+                                        </div>`;
         }
-        let maxDate = year + "-" + month + "-" + day;
-        document.querySelector("#date").setAttribute("min", maxDate);
-      }
-      setDate();
+        for (i = lastdayofCurrentMonth; i < 6; i++) {
+          span += `<div class="px-2 py-2 cursor-pointer flex w-full justify-center">
+                                            <p class="text-base text-gray-500 dark:text-gray-100 font-medium">${
+                                              i - lastdayofCurrentMonth + 1
+                                            }</p>
+                                        </div>`;
+        }
+        dates.innerHTML = span;
+      };
+      createCal();
+
+      const changeCal = document.querySelectorAll(".mover button");
+      console.log(changeCal);
+      changeCal.forEach((change) => {
+        change.addEventListener("click", () => {
+          span = " ";
+          currentMonth =
+            change.id === "moveback" ? currentMonth - 1 : currentMonth + 1;
+
+          if (currentMonth < 0 || currentMonth > 11) {
+            date = new Date(currentYear, currentMonth, new Date().getDate());
+            currentYear = date.getFullYear();
+            currentMonth = date.getMonth();
+          } else {
+            date = new Date(currentYear, currentMonth, new Date().getDate());
+          }
+          createCal();
+        });
+      });
     </script>
   </body>
 </html>
