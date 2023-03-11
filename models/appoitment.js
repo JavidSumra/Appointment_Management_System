@@ -19,6 +19,13 @@ module.exports = (sequelize, DataTypes) => {
         order: [["Starting", "ASC"]],
       });
     }
+    static getListofAppointment(id) {
+      return this.findAll({
+        where: {
+          userId: id,
+        },
+      });
+    }
     static getCompletedAppointment(id) {
       return this.findAll({
         where: {

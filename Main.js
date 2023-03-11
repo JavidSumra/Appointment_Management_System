@@ -110,7 +110,7 @@ let today = new Date().toLocaleDateString("en-In");
 // Get Request
 app.get("/", (request, response) => {
   try {
-    console.log(request.session.passport);
+    // console.log(request.session.passport);
     if (request.session.passport) {
       response.redirect("/Login/Home");
     } else {
@@ -141,11 +141,10 @@ app.get(
         request.user.id,
         today
       );
+      let list = await Appoitment.getListofAppointment(request.user.id);
       let completedAppointment = await Appoitment.getCompletedAppointment(
         request.user.id
       );
-      console.log(getAppointment);
-      // console.log(findUser);
       if (request.accepts("html")) {
         response.render("Home", {
           csrfToken: request.csrfToken(),
@@ -153,10 +152,11 @@ app.get(
           getAppointment,
           completedAppointment,
           today,
+          list,
         });
       } else {
         return response.json({
-          getAppointment,
+          list,
         });
       }
     } catch (error) {
@@ -202,12 +202,18 @@ app.get(
     try {
       let getAppointment = await Appoitment.findByPk(request.params.id);
       let findUser = await User.findByPk(request.user.id);
-      response.render("Edit", {
-        csrfToken: request.csrfToken(),
-        getAppointment,
-        findUser,
-        today,
-      });
+      if (request.accepts("html")) {
+        response.render("Edit", {
+          csrfToken: request.csrfToken(),
+          getAppointment,
+          findUser,
+          today,
+        });
+      } else {
+        return response.json({
+          getAppointment,
+        });
+      }
     } catch (error) {
       console.log("Error:" + error);
       response.status(402).send(error);
@@ -274,24 +280,25 @@ app.post(
   "/NewAppointment",
   connectEnsure.ensureLoggedIn({ redirectTo: "/" }),
   async (request, response) => {
-    let getUser = await Appoitment.getAppointmentList(request.user.id, today);
     let todayDate = new Date(request.body.app_Date).toLocaleDateString("en-In");
-    console.log(getUser);
+    let getUser = await Appoitment.getAppointmentList(
+      request.user.id,
+      todayDate
+    );
+
     let statusStart = true,
       appointmentTitle;
     // console.log(todayDate == today);
-    if (todayDate == today) {
-      for (let i = 0; i < getUser.length; i++) {
-        console.log("For LOOP");
-        // console.log(`${i + 1}:` + request.body.E_Time > getUser[i].Ending);
-        if (
-          (getUser[i].Starting < request.body.S_Time &&
-            request.body.S_Time < getUser[i].Ending) ||
-          request.body.E_Time < getUser[i].Ending
-        ) {
-          statusStart = false;
-          appointmentTitle = getUser[i].Title;
-        }
+    for (let i = 0; i < getUser.length; i++) {
+      console.log("For LOOP");
+      // console.log(`${i + 1}:` + request.body.E_Time > getUser[i].Ending);
+      if (
+        (getUser[i].Starting < request.body.S_Time &&
+          request.body.S_Time < getUser[i].Ending) ||
+        request.body.E_Time < getUser[i].Ending
+      ) {
+        statusStart = false;
+        appointmentTitle = getUser[i].Title;
       }
     }
     try {
@@ -334,13 +341,13 @@ app.post(
   async (request, response) => {
     try {
       let appoitment = await Appoitment.findByPk(request.params.id);
-      let NewTitle = request.body.New_Title.trim();
       let AppointmentDetail = await appoitment.UpdateTitle(
-        NewTitle,
+        request.body.NewTitle.trim(),
         request.params.id
       );
+      console.log(AppointmentDetail);
       request.flash("success", "Title Updated");
-      response.redirect("/Login/Home");
+      response.redirect("back");
     } catch (error) {
       console.log("Error:" + error);
       response.status(402).send(error);

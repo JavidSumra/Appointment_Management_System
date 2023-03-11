@@ -26,6 +26,7 @@ describe("Appointement Management Test suite", () => {
     server = app.listen(3005, () => {});
     agent = request.agent(server);
   });
+
   afterAll(async () => {
     await db.sequelize.close();
     server.close();
@@ -42,6 +43,7 @@ describe("Appointement Management Test suite", () => {
     });
     expect(res.statusCode).toBe(302);
   });
+
   test("Signout", async () => {
     let res = await agent.get("/Login/Home");
     expect(res.statusCode).toBe(200);
@@ -50,11 +52,13 @@ describe("Appointement Management Test suite", () => {
     res = await agent.get("/Login/Home");
     expect(res.statusCode).toBe(302);
   });
+
   test("Login", async () => {
     await login(agent, "javidsumara987@gmail.com", "1234");
     const res = await agent.get("/Login/Home");
     expect(res.statusCode).toBe(200);
   });
+
   test("Create New Appointment", async () => {
     let agent = request.agent(server);
     await login(agent, "javidsumara987@gmail.com", "1234");
@@ -69,6 +73,39 @@ describe("Appointement Management Test suite", () => {
       _csrf: csrfToken,
     });
     expect(response.statusCode).toBe(302);
+  });
+
+  test("Mark Appointment as Complete", async () => {
+    let agent = request.agent(server);
+    await login(agent, "javidsumara987@gmail.com", "1234");
+    let res = await agent.get("/AddAppointment/:day/:month/:year");
+    let csrfToken = extractCsrfToken(res);
+    await agent.post("/NewAppointment").send({
+      Title: "Interview",
+      S_Time: "01:20:00",
+      E_Time: "02:20:00",
+      app_Date: new Date().toLocaleDateString("en-In"),
+      Status: false,
+      _csrf: csrfToken,
+    });
+    let HomePage = await agent
+      .get("/Login/Home")
+      .set("Accept", "application/json");
+    let parseHomePage = JSON.parse(HomePage.text);
+    let lengthofAppointment = parseHomePage.list.length;
+    let Appointement = parseHomePage.list[lengthofAppointment - 1];
+    let Appointmentid = Appointement.id;
+
+    res = await agent.get("/Login/Home");
+    csrfToken = extractCsrfToken(res);
+
+    let response = await agent
+      .put(`/Update/Appointment/${Appointmentid}`)
+      .send({
+        _csrf: csrfToken,
+      });
+    let status = Boolean(response.text);
+    expect(status).toBe(true);
   });
 
   test("Delete Appointment", async () => {
@@ -89,12 +126,9 @@ describe("Appointement Management Test suite", () => {
       .get("/Login/Home")
       .set("Accept", "application/json");
     let parsedAppointments = JSON.parse(getAppointmentPage.text);
-    console.log(parsedAppointments);
-    console.log(parsedAppointments.getAppointment);
-    const parsedAppointmentsLength = parsedAppointments.getAppointment.length;
-    console.log(parsedAppointmentsLength);
+    const parsedAppointmentsLength = parsedAppointments.list.length;
     let AppointementDetail =
-      parsedAppointments.getAppointment[parsedAppointmentsLength - 1];
+      parsedAppointments.list[parsedAppointmentsLength - 1];
     let Appointmentid = AppointementDetail.id;
 
     response = await agent.get("/Login/Home");
@@ -107,13 +141,49 @@ describe("Appointement Management Test suite", () => {
     expect(status).toBe(true);
   });
 
-  //   test("Edit Appointment", async () => {
-  //     let agent = request.agent(server);
-  //     await login(agent, "javidsumara987@gmail.com", "1234");
-  //     let response = await agent.get("/Edit/Appointment/:id");
-  //     let csrfToken = extractCsrfToken(response);
-  //     await agent.post("/modify/Appointment/:id").send({
-  //       New_Title: "Interview 2",
-  //     });
-  //   });
+  test("Edit Appointment Title", async () => {
+    let agent = request.agent(server);
+    await login(agent, "javidsumara987@gmail.com", "1234");
+    let response = await agent.get("/AddAppointment/:day/:month/:year");
+    let csrfToken = extractCsrfToken(response);
+    await agent.post("/NewAppointment").send({
+      Title: "Interview",
+      S_Time: "01:20:00",
+      E_Time: "02:20:00",
+      app_Date: new Date().toLocaleDateString("en-In"),
+      Status: false,
+      _csrf: csrfToken,
+    });
+
+    let getAppointmentPage = await agent
+      .get("/Login/Home")
+      .set("Accept", "application/json");
+
+    let parsedAppointments = JSON.parse(getAppointmentPage.text);
+    let parsedAppointmentsLength = parsedAppointments.list.length;
+    let AppointementDetail =
+      parsedAppointments.list[parsedAppointmentsLength - 1];
+    let Appointmentid = AppointementDetail.id;
+
+    let res = await agent.get(`/Edit/Appointment/${Appointmentid}`);
+    csrfToken = extractCsrfToken(res);
+    res = await agent
+      .get(`/Edit/Appointment/${Appointmentid}`)
+      .set("Accept", "application/json");
+
+    parsedAppointments = JSON.parse(res.text);
+    Appointmentid = parsedAppointments.getAppointment.id;
+
+    await agent.post(`/modify/Appointment/${Appointmentid}`).send({
+      NewTitle: "Event 1",
+      _csrf: csrfToken,
+    });
+    let resp = await agent.get("/Login/Home").set("Accept", "application/json");
+
+    parsedAppointments = JSON.parse(resp.text);
+    parsedAppointmentsLength = parsedAppointments.list.length;
+    resp = parsedAppointments.list[parsedAppointmentsLength - 1].Title;
+
+    expect(resp).toBe("Event 1");
+  });
 });
