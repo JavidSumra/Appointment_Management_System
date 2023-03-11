@@ -128,12 +128,6 @@
       </div>
       <div class="flex flex-row p-10 relative bg-gray-50 rounded">
         <%if(getAppointment.length != 0){%>
-        <div
-          class="absolute app-bg-yellow-3 text-xs font-semibold px-3 py-0.5 rounded-br-md rounded-tl-md text-white"
-          style="top: 76px"
-        >
-          New
-        </div>
         <table class="w-full">
           <thead>
             <tr>
@@ -157,14 +151,14 @@
           <tbody>
             <% for (let i = 0; i < getAppointment.length;i++) { %>
             <tr class="app-border-1">
-              <td></td>
               <td>
                 <div
-                  class="number flex justify-center items-center rounded-md w-8 h-8 app-bg-yellow-2 app-color-yellow-1 text-xl font-semibold"
+                  class="flex justify-center items-center rounded-md w-8 h-8 app-bg-yellow-2 app-color-yellow-1 text-xl font-semibold"
                 >
                   <%=i+1%>
                 </div>
               </td>
+              <td></td>
               <td>
                 <div class="flex flex-row py-3">
                   <div class="flex flex-col">
@@ -185,9 +179,15 @@
                 >
               </td>
               <td>
-                <span class="font-semibold text-xl app-color-gray-1"
+                <% if(getAppointment[i].Status === true) {%>
+                <span class="font-semibold text-xl text-green-400"
                   ><%=getAppointment[i].Status%></span
                 >
+                <% } else{%>
+                <span class="font-semibold text-xl text-red-400"
+                  ><%=getAppointment[i].Status%></span
+                >
+                <%}%>
               </td>
               <td>
                 <% if(getAppointment[i].Status != true) { %>
@@ -282,8 +282,9 @@
                 </button>
               </td>
               <td>
-                <button
+                <a
                   class="mx-0 flex items-center justify-center app-button-shadow w-32 py-2 rounded-3xl"
+                  href="/Edit/Appointment/<%=getAppointment[i].id%>"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -304,7 +305,7 @@
                   <span class="ml-3 font-semibold text-md app-color-gray-1"
                     >Edit</span
                   >
-                </button>
+                </a>
               </td>
             </tr>
             <tr class="app-border-1">

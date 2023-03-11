@@ -11,6 +11,40 @@
   <body>
     <div class="flex items-center justify-center py-8 px-4">
       <div class="max-w-sm w-full shadow-lg">
+        <% if(messages && messages.error && messages.error.length != 0) { %>
+        <div
+          style="
+            background-color: #fee2e2;
+            border-color: #f87171;
+            color: #ef4444;
+            border-radius: 3px;
+            position: relative;
+            padding: 10px;
+            text-align: center;
+            margin-bottom: 20px;
+          "
+          role="alert"
+        >
+          <strong> <%=messages.error %> </strong>
+        </div>
+        <% } %> <% if(messages && messages.success && messages.success.length !=
+        0) { %>
+        <div
+          style="
+            background-color: #ecfccb;
+            border-color: #a3e635;
+            color: #84cc16;
+            border-radius: 3px;
+            position: relative;
+            padding: 10px;
+            text-align: center;
+            margin-bottom: 20px;
+          "
+          role="alert"
+        >
+          <strong> <%=messages.success %> </strong>
+        </div>
+        <% } %>
         <div class="md:p-8 p-5 dark:bg-gray-800 bg-white rounded-t">
           <div class="px-4 flex items-center justify-between">
             <span
@@ -112,72 +146,103 @@
                 <p
                   class="text-xs font-light leading-3 text-gray-500 dark:text-gray-300"
                 >
-                  <%=getAppointment.Starting%> - <%=getAppointment.Ending%>
+                  <%=getAppointment[i].Starting%> -
+                  <%=getAppointment[i].Ending%>
                 </p>
-                <a
+                <p
                   tabindex="0"
                   class="focus:outline-none text-lg font-medium leading-5 text-gray-800 dark:text-gray-100 mt-2"
-                  ><%=getAppointment.Title%></a
                 >
+                  <%=getAppointment[i].Title%>
+                </p>
               </div>
               <% } %> <% } else {%>
               <div class="flex text-center text-2xl font-medium">
-                No Appointment Today
+                No Appointment for <%=date%>
               </div>
               <% } %>
             </div>
-            <div class="addAppointment hidden duration-300">
-              <div class="overflow-hidden rounded bg-gray-900">
-                <div
-                  class="w-full h-12 flex items-center justify-between text-gray-800"
-                >
-                  <div class="text-xl font-medium mx-auto text-white">
-                    Create New Event
-                  </div>
-                </div>
-                <div class="w-full h-full flex flex-col p-5">
-                  <div class="w-full h-10 flex items-center justify-between">
-                    <input
-                      type="text"
-                      id="helper-text"
-                      aria-describedby="helper-text-explanation"
-                      class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                      placeholder="Appointment Name"
-                    />
-                  </div>
+            <div class="addAppointment hidden">
+              <form action="/NewAppointment" method="post">
+                <div class="overflow-hidden rounded bg-gray-900 duration-600">
                   <div
-                    class="w-full h-10 flex items-center justify-between my-5"
+                    class="w-full h-12 flex items-center justify-between text-gray-800"
                   >
-                    <input
-                      type="time"
-                      id="helper-text"
-                      aria-describedby="helper-text-explanation"
-                      class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                    />
+                    <div class="text-xl font-medium mx-auto text-white">
+                      Create New Event
+                    </div>
                   </div>
-                  <div class="w-full h-10 flex items-center justify-between">
-                    <input
-                      type="time"
-                      id="helper-text"
-                      aria-describedby="helper-text-explanation"
-                      class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                    />
+                  <div class="w-full h-full flex flex-col p-5">
+                    <div class="w-full h-10 flex items-center justify-between">
+                      <input
+                        type="hidden"
+                        name="_csrf"
+                        value="<%= csrfToken%>"
+                      />
+                      <input
+                        type="text"
+                        name="Title"
+                        aria-describedby="helper-text-explanation"
+                        class="bg-gray-50 outline-none border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                        placeholder="Appointment Name"
+                        required
+                      />
+                    </div>
+                    <div
+                      class="w-full h-10 flex items-center justify-between my-5"
+                    >
+                      <input
+                        type="time"
+                        id="time"
+                        name="S_Time"
+                        aria-describedby="helper-text-explanation"
+                        class="bg-gray-50 outline-none border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                        required
+                      />
+                    </div>
+                    <div class="w-full h-10 flex items-center justify-between">
+                      <input
+                        type="time"
+                        id="time"
+                        name="E_Time"
+                        aria-describedby="helper-text-explanation"
+                        class="bg-gray-50 outline-none border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                        required
+                      />
+                    </div>
+                    <div
+                      class="my-5 w-full h-10 flex items-center justify-between"
+                    >
+                      <input
+                        type="date"
+                        name="app_Date"
+                        id="helper-date"
+                        aria-describedby="helper-text-explanation"
+                        class="bg-gray-50 outline-none border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div class="flex items-center justify-center p-5">
+                    <button
+                      class="p-2 text-center h-10 text-base font-medium bg-green-400 text-white rounded cursor-pointer hover:transparent"
+                    >
+                      Add Appointment
+                    </button>
                   </div>
                 </div>
-                <div class="flex items-center justify-center p-5">
-                  <button
-                    class="p-2 text-center h-10 text-base font-medium bg-green-400 text-white rounded cursor-pointer hover:transparent"
-                  >
-                    Add Event
-                  </button>
-                </div>
-              </div>
+              </form>
             </div>
           </div>
-          <button class="add-event duration-300" onclick="changeDiv()">
+          <button
+            class="duration-300 absolute"
+            onclick="changeDiv()"
+            title="Add New Appoin
+          "
+          >
             <div class="mx-60 mt-5">
               <svg
-                class="text-gray-900 bg-gray-400 rounded-full"
+                class="add-event duration-300 text-gray-900 bg-gray-400 rounded-full"
                 xmlns="http://www.w3.org/2000/svg"
                 width="45"
                 height="45"
@@ -192,10 +257,36 @@
               </svg>
             </div>
           </button>
+          <a class="duration-300 w-40" href="/Login/Home" title="Go Back">
+            <div class="mt-5">
+              <svg
+                class="p-2 duration-300 text-gray-900 bg-red-300 hover:bg-red-400 rounded-full"
+                xmlns="http://www.w3.org/2000/svg"
+                width="45"
+                height="45"
+                fill="currentColor"
+                class="bi bi-arrow-right"
+                viewBox="0 0 16 16"
+                id="IconChangeColor"
+                transform="scale(-1, 1)"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8z"
+                  id="mainIconPathAttribute"
+                  fill="#000000"
+                ></path>
+              </svg>
+            </div>
+          </a>
         </div>
       </div>
     </div>
     <script>
+      let today = new Date().toISOString().split("T")[0];
+      document.getElementById("helper-date").setAttribute("min", today);
+      document.getElementById("helper-date").setAttribute("value", today);
+
       let Appointment = document.querySelector(".addAppointment"),
         divAppointment = document.querySelector(".Appointment"),
         rotate = true;
@@ -211,16 +302,15 @@
         }
       };
 
+      let span = " ",
+        div = " ",
+        i;
       // Calendar
       let month = document.querySelector(".month"),
-        i;
-      let dates = document.querySelector(".dates");
-
-      let date = new Date();
-      let currentMonth = date.getMonth();
-      let currentYear = date.getFullYear();
-      let span = " ";
-      let div = " ";
+        dates = document.querySelector(".dates"),
+        date = new Date(),
+        currentMonth = date.getMonth(),
+        currentYear = date.getFullYear();
 
       let arrofmonth = [
         "January",
@@ -260,11 +350,13 @@
         // console.log("Last Date:" + lastdateofCurrentMonth);
         // console.log("Last Date:" + lastdateofMonth);
         for (i = firstdayofCurrentMonth; i > 0; i--) {
-          span += `<div class="px-2 py-2 cursor-pointer flex w-full justify-center">
-                                            <p class="text-base text-gray-500 dark:text-gray-100 font-medium">${
+          span += `<a href="/AddAppointment/${
+            lastdateofMonth - i + 1
+          }/${currentMonth}/${currentYear}" class="px-2 py-2 cursor-pointer flex w-full justify-center">
+                                            <p class="w-full h-full text-center text-gray-500 dark:text-gray-100 font-medium hover:bg-orange-300 rounded-full">${
                                               lastdateofMonth - i + 1
                                             }</p>
-                                        </div>`;
+                                        </a>`;
           // console.log(lastdateofMonth - i + 1);
         }
         for (i = 1; i <= lastdateofCurrentMonth; i++) {
@@ -273,20 +365,24 @@
             date.getMonth() === new Date().getMonth() &&
             date.getFullYear() === new Date().getFullYear();
 
-          span += `<div class="px-2 py-2 cursor-pointer flex w-full justify-center">
+          span += `<a href="/AddAppointment/${i}/${
+            currentMonth + 1
+          }/${currentYear}" class="px-2 py-2 cursor-pointer flex w-full justify-center">
                                             <p ${
                                               isToday
                                                 ? 'class="w-full h-full text-center text-base text-gray-900 font-medium bg-indigo-600 rounded-full"'
-                                                : 'class="text-base text-gray-900 dark:text-gray-100 font-medium"'
+                                                : 'class="w-full h-full text-center text-gray-900 dark:text-gray-100 font-medium hover:bg-orange-300 rounded-full"'
                                             }>${i}</p>
-                                        </div>`;
+                                        </a>`;
         }
         for (i = lastdayofCurrentMonth; i < 6; i++) {
-          span += `<div class="px-2 py-2 cursor-pointer flex w-full justify-center">
-                                            <p class="text-base text-gray-500 dark:text-gray-100 font-medium">${
+          span += `<a href="/AddAppointment/${i - lastdayofCurrentMonth + 1}/${
+            currentMonth + 2
+          }/${currentYear}" class="px-2 py-2 cursor-pointer flex w-full justify-center">
+                                            <p class="w-full h-full text-center text-gray-500 dark:text-gray-100 font-medium hover:bg-orange-300 rounded-full">${
                                               i - lastdayofCurrentMonth + 1
                                             }</p>
-                                        </div>`;
+                                        </a>`;
         }
         dates.innerHTML = span;
       };

@@ -10,12 +10,13 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // define association here
     }
-    static getAppointmentList(id) {
+    static getAppointmentList(id, today) {
       return this.findAll({
         where: {
           userId: id,
+          Appointment_Date: today,
         },
-        order: [["id", "ASC"]],
+        order: [["Starting", "ASC"]],
       });
     }
     static getCompletedAppointment(id) {
@@ -25,6 +26,22 @@ module.exports = (sequelize, DataTypes) => {
           Status: true,
         },
         order: [["id", "ASC"]],
+      });
+    }
+    static getTime(Starting, userId) {
+      return this.findAll({
+        where: {
+          Starting,
+          userId,
+        },
+      });
+    }
+    static getEndTime(Ending, userId) {
+      return this.findAll({
+        where: {
+          Ending,
+          userId,
+        },
       });
     }
     static removeAppointment(id, userId) {
@@ -40,26 +57,39 @@ module.exports = (sequelize, DataTypes) => {
         Status,
       });
     }
+    UpdateTitle(Title, id) {
+      return this.update({
+        Title,
+        where: {
+          id,
+        },
+      });
+    }
   }
   appoitment.init(
     {
-      Title: DataTypes.STRING,
-      userId: DataTypes.INTEGER,
-      Starting: DataTypes.STRING,
-      Ending: DataTypes.STRING,
-      Status: {
-        type: DataTypes.BOOLEAN,
-        defaultValue: false,
-      },
-      Appintment_Date: {
-        type: DataTypes.DATEONLY,
+      Title: {
+        type: DataTypes.STRING,
         allowNull: false,
-        defaultValue: Date.now(),
+      },
+      userId: DataTypes.INTEGER,
+      Starting: {
+        type: DataTypes.TIME,
+        allowNull: false,
+      },
+      Ending: {
+        type: DataTypes.TIME,
+        allowNull: false,
+      },
+      Status: DataTypes.BOOLEAN,
+      Appointment_Date: {
+        type: DataTypes.STRING,
+        allowNull: false,
       },
     },
     {
       sequelize,
-      modelName: "appointment",
+      modelName: "appoitment",
     }
   );
   return appoitment;

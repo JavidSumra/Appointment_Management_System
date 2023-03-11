@@ -26,7 +26,7 @@ const { sequelize } = require("./models"),
   DataTypes = require("sequelize");
 
 const User = require("./models/user")(sequelize, DataTypes),
-  Appoitment = require("./models/appointment")(sequelize, DataTypes);
+  Appoitment = require("./models/appoitment")(sequelize, DataTypes);
 
 // Setup View Engine And Path of Views
 app.set("view engine", "ejs");
@@ -106,10 +106,16 @@ app.use(function (request, response, next) {
   next();
 });
 
+let today = new Date().toLocaleDateString("en-In");
 // Get Request
 app.get("/", (request, response) => {
   try {
-    response.render("Login", { csrfToken: request.csrfToken() });
+    console.log(request.session.passport);
+    if (request.session.passport) {
+      response.redirect("/Login/Home");
+    } else {
+      response.render("Login", { csrfToken: request.csrfToken() });
+    }
   } catch (error) {
     console.log("Error:" + error);
     response.status(402).send(error);
@@ -131,17 +137,56 @@ app.get(
   async (request, response) => {
     try {
       let findUser = await User.findByPk(request.user.id);
-      let getAppointment = await Appoitment.getAppointmentList(request.user.id);
+      let getAppointment = await Appoitment.getAppointmentList(
+        request.user.id,
+        today
+      );
       let completedAppointment = await Appoitment.getCompletedAppointment(
         request.user.id
       );
       console.log(getAppointment);
-      console.log(findUser);
-      response.render("Home", {
+      // console.log(findUser);
+      if (request.accepts("html")) {
+        response.render("Home", {
+          csrfToken: request.csrfToken(),
+          findUser,
+          getAppointment,
+          completedAppointment,
+          today,
+        });
+      } else {
+        return response.json({
+          getAppointment,
+        });
+      }
+    } catch (error) {
+      console.log("Error:" + error);
+      response.status(402).send(error);
+    }
+  }
+);
+
+app.get(
+  "/AddAppointment/:day/:month/:year",
+  connectEnsure.ensureLoggedIn({ redirectTo: "/" }),
+  async (request, response) => {
+    try {
+      let UserDetail = request.user;
+      let date =
+        request.params.day +
+        "/" +
+        request.params.month +
+        "/" +
+        request.params.year;
+      let getAppointment = await Appoitment.getAppointmentList(
+        request.user.id,
+        date
+      );
+      response.render("AddAppointment", {
         csrfToken: request.csrfToken(),
-        findUser,
+        UserDetail,
         getAppointment,
-        completedAppointment,
+        date,
       });
     } catch (error) {
       console.log("Error:" + error);
@@ -151,16 +196,17 @@ app.get(
 );
 
 app.get(
-  "/AddAppointment",
+  "/Edit/Appointment/:id",
   connectEnsure.ensureLoggedIn({ redirectTo: "/" }),
   async (request, response) => {
     try {
-      let UserDetail = request.user;
-      let getAppointment = await Appoitment.getAppointmentList(request.user.id);
-      response.render("AddAppointment", {
+      let getAppointment = await Appoitment.findByPk(request.params.id);
+      let findUser = await User.findByPk(request.user.id);
+      response.render("Edit", {
         csrfToken: request.csrfToken(),
-        UserDetail,
         getAppointment,
+        findUser,
+        today,
       });
     } catch (error) {
       console.log("Error:" + error);
@@ -225,27 +271,54 @@ app.post(
 );
 
 app.post(
-  "/NewAppointment/:id",
+  "/NewAppointment",
   connectEnsure.ensureLoggedIn({ redirectTo: "/" }),
   async (request, response) => {
+    let getUser = await Appoitment.getAppointmentList(request.user.id, today);
+    let todayDate = new Date(request.body.app_Date).toLocaleDateString("en-In");
+    console.log(getUser);
+    let statusStart = true,
+      appointmentTitle;
+    // console.log(todayDate == today);
+    if (todayDate == today) {
+      for (let i = 0; i < getUser.length; i++) {
+        console.log("For LOOP");
+        // console.log(`${i + 1}:` + request.body.E_Time > getUser[i].Ending);
+        if (
+          (getUser[i].Starting < request.body.S_Time &&
+            request.body.S_Time < getUser[i].Ending) ||
+          request.body.E_Time < getUser[i].Ending
+        ) {
+          statusStart = false;
+          appointmentTitle = getUser[i].Title;
+        }
+      }
+    }
     try {
-      console.log(request.body);
-      console.log(request.params.id);
-
-      if (request.body.S_Time != request.body.E_Time) {
-        let addNewAppointment = await Appoitment.create({
-          Title: request.body.title,
-          userId: request.user.id,
-          Starting: request.body.S_Time,
-          Ending: request.body.E_Time,
-          Status: false,
-          Appintment_Date: request.body.Date,
-        });
-        console.log(addNewAppointment);
-        request.flash("success", "Created Successfully");
-        response.redirect("/Login/Home");
+      // console.log(statusStart);
+      if (statusStart) {
+        if (request.body.E_Time > request.body.S_Time) {
+          let addNewAppointment = await Appoitment.create({
+            Title: request.body.Title.trim(),
+            userId: request.user.id,
+            Starting: request.body.S_Time,
+            Ending: request.body.E_Time,
+            Status: false,
+            Appointment_Date: todayDate,
+          });
+          console.log(addNewAppointment);
+          request.flash("success", "Created Successfully");
+          response.redirect("/Login/Home");
+        } else {
+          console.log("Not Executed");
+          request.flash("error", "Please Enter Valid Time");
+          response.redirect("back");
+        }
       } else {
-        request.flash("error", "Please Enter Different Time");
+        request.flash(
+          "error",
+          `This Time Slot is Occupieded by ${appointmentTitle}`
+        );
         response.redirect("back");
       }
     } catch (error) {
@@ -255,6 +328,25 @@ app.post(
   }
 );
 
+app.post(
+  "/modify/Appointment/:id",
+  connectEnsure.ensureLoggedIn({ redirectTo: "/" }),
+  async (request, response) => {
+    try {
+      let appoitment = await Appoitment.findByPk(request.params.id);
+      let NewTitle = request.body.New_Title.trim();
+      let AppointmentDetail = await appoitment.UpdateTitle(
+        NewTitle,
+        request.params.id
+      );
+      request.flash("success", "Title Updated");
+      response.redirect("/Login/Home");
+    } catch (error) {
+      console.log("Error:" + error);
+      response.status(402).send(error);
+    }
+  }
+);
 // Delete Request
 
 app.delete(

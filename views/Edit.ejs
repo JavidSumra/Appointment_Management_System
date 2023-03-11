@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="csrf-token" content="<%= csrfToken %>" />
+    <title>Edit Appointment</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body>
+    <%-include ("Navigation")%>
+    <div class="">
+      <div class="mx-10">
+        <div class="flex justify-center p-10 relative bg-gray-50 rounded">
+          <div>
+            <div class="text-2xl font-medium my-3">
+              Appointment Title:<%=getAppointment.Title%>
+            </div>
+            <div class="text-2xl font-medium my-3">
+              Starting Time:<%=getAppointment.Starting%>
+            </div>
+            <div class="text-2xl font-medium my-3">
+              Ending Time:<%=getAppointment.Ending%>
+            </div>
+            <form
+              action="/modify/Appointment/<%=getAppointment.id%>"
+              method="post"
+            >
+              <div class="w-full h-10 flex items-center justify-between my-5">
+                <input type="hidden" name="_csrf" value="<%= csrfToken%>" />
+                <input
+                  type="text"
+                  name="New_Title"
+                  placeholder="Enter New Title"
+                  aria-describedby="helper-text-explanation"
+                  class="bg-gray-50 outline-none border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                  required
+                />
+              </div>
+              <div class="flex items-center justify-center p-5">
+                <button
+                  class="p-2 text-center h-10 text-base font-medium bg-green-400 text-white rounded cursor-pointer hover:transparent bg-green-500"
+                >
+                  Update Title
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

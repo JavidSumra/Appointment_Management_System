@@ -52,7 +52,7 @@
           class="m-5 text-xl font-medium border-2 border-y-0 border-l-0 border-slate-400 p-2.5"
         >
           <span class="block text-2xl">Today</span
-          ><span class="text-blue-600 text-2xl mr-4" id="date"></span>
+          ><span class="text-blue-600 text-2xl mr-4" id="date"><%=today%></span>
         </div>
         <div
           class="text-xl font-medium border-2 border-y-0 border-l-0 border-slate-400 p-2.5"
@@ -64,7 +64,7 @@
           <div
             class="text-2xl bg-slate-100 font-medium border rounded-full p-4 duration-300 hover:shadow-2xl cursor-pointer"
           >
-            <a href="/AddAppointment">Add Appointment</a>
+            <a href="/AddAppointment/<%=today%>">Add Appointment</a>
           </div>
         </div>
         <div
@@ -75,12 +75,10 @@
       </div>
     </div>
     <script>
-      let InsertDate = document.querySelector("#date");
       let InsertTime = document.querySelector("#time");
 
       function TimeChanger() {
         let dateObj = new Date();
-        InsertDate.innerHTML = dateObj.toLocaleDateString("en-In");
         InsertTime.innerHTML = dateObj
           .toLocaleTimeString("en-In", {
             hour12: true,
