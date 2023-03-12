@@ -31,12 +31,6 @@ const User = require("./models/user")(sequelize, DataTypes),
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname + "/views"));
 
-// Middleware
-app.use(bodyparser.json());
-app.use(express.urlencoded({ extended: false }));
-app.use(cookieparser("This_is_My_Secret_String"));
-app.use(csrf("this_should_be_32_character_long", ["POST", "PUT", "DELETE"]));
-
 app.use(flash());
 
 app.use(
@@ -50,6 +44,12 @@ app.use(
 
 // To Authenticate User I use Passport libraby
 app.use(passport.initialize());
+
+// Middleware
+app.use(bodyparser.json());
+app.use(express.urlencoded({ extended: false }));
+app.use(cookieparser("This_is_My_Secret_String"));
+app.use(csrf("this_should_be_32_character_long", ["POST", "PUT", "DELETE"]));
 app.use(passport.session());
 
 passport.use(
