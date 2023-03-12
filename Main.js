@@ -1,20 +1,19 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-undef */
-
 //Importing Dependencies Which is Used With in Project
-const express = require("express");
-const app = express();
-const ejs = require("ejs");
-const bodyparser = require("body-parser");
-const cookieparser = require("cookie-parser");
-const passport = require("passport");
-const LocalStrategy = require("passport-local");
-const connectEnsure = require("connect-ensure-login");
-const flash = require("connect-flash");
-const session = require("express-session");
-const csrf = require("tiny-csrf");
-const bcrypt = require("bcrypt");
-const sequelize = require("sequelize");
+const express = require("express"),
+  app = express(),
+  ejs = require("ejs"),
+  bodyparser = require("body-parser"),
+  cookieparser = require("cookie-parser"),
+  passport = require("passport"),
+  LocalStrategy = require("passport-local"),
+  connectEnsure = require("connect-ensure-login"),
+  flash = require("connect-flash"),
+  session = require("express-session"),
+  csrf = require("tiny-csrf"),
+  bcrypt = require("bcrypt");
+
 // Global Variable
 const saltRound = 10;
 
@@ -22,11 +21,11 @@ const saltRound = 10;
 const path = require("path");
 
 // Modules
-// const sequelize = require("./models");
-const DataTypes = require("sequelize");
+const { sequelize } = require("./models"),
+  DataTypes = require("sequelize");
 
-const User = require("./models/user")(sequelize, DataTypes);
-const Appoitment = require("./models/appoitment")(sequelize, DataTypes);
+const User = require("./models/user")(sequelize, DataTypes),
+  Appoitment = require("./models/appoitment")(sequelize, DataTypes);
 
 // Setup View Engine And Path of Views
 app.set("view engine", "ejs");
