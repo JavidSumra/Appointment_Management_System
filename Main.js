@@ -14,7 +14,7 @@ const flash = require("connect-flash");
 const session = require("express-session");
 const csrf = require("tiny-csrf");
 const bcrypt = require("bcrypt");
-
+const sequelize = require("sequelize");
 // Global Variable
 const saltRound = 10;
 
