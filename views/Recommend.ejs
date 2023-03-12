@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="csrf-token" content="<%= csrfToken %>" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Change or Recommendation of Appointment</title>
+  </head>
+  <body>
+    <div class="flex items-center justify-center py-8 px-4">
+      <div class="max-w-sm w-full shadow-lg">
+        <% if(messages && messages.error && messages.error.length != 0) { %>
+        <div
+          style="
+            background-color: #fee2e2;
+            border-color: #f87171;
+            color: #ef4444;
+            border-radius: 3px;
+            position: relative;
+            padding: 10px;
+            text-align: center;
+            margin-bottom: 20px;
+          "
+          role="alert"
+        >
+          <strong> <%=messages.error %> </strong>
+        </div>
+        <% } %> <% if(messages && messages.success && messages.success.length !=
+        0) { %>
+        <div
+          style="
+            background-color: #ecfccb;
+            border-color: #a3e635;
+            color: #84cc16;
+            border-radius: 3px;
+            position: relative;
+            padding: 10px;
+            text-align: center;
+            margin-bottom: 20px;
+          "
+          role="alert"
+        >
+          <strong> <%=messages.success %> </strong>
+        </div>
+        <% } %>
+        <div id="block-1" class="w-full font-medium text-2xl p-10">
+          <span
+            >Recommendation Slot: <%=timeslot.timeStart%> -
+            <%=timeslot.timeEnd%></span
+          ><span class="font-medium text-sm block"
+            >(Note:For Now It will Find Time Slot for Duration 10 Minute)</span
+          >
+          <span class="font-medium text-xl p-2 mt-5 block"
+            >Do You Want to Create Appointment on This Slot</span
+          >
+          <div class="flex mx-10 my-10">
+            <button
+              class="bg-green-400 p-3 rounded items-center justify-center mx-5 hover:bg-green-500"
+              onclick="createNewAppointment('<%=NewTitle%>','<%=timeslot.timeStart%>','<%=timeslot.timeEnd%>','<%=getAppointment.id%>')"
+            >
+              Yes
+            </button>
+            <a
+              class="bg-red-400 p-3 rounded items-center justify-center mx-5 hover:bg-red-500"
+              href="/Login/Home"
+            >
+              No
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+      let token = document
+        .querySelector('meta[name="csrf-token"]')
+        .getAttribute("content");
+      const createNewAppointment = (title, start, end, id) => {
+        fetch(`/CreateNewAppointment/${title}/${start}/${end}/${id}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            _csrf: token,
+          }),
+        })
+          .then((res) => {
+            if (res.ok) {
+              console.log("completed");
+              window.location.href = "/Login/Home";
+            }
+          })
+          .catch((err) => console.log(err));
+      };
+    </script>
+  </body>
+</html>

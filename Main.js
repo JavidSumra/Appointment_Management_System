@@ -17,6 +17,7 @@ const express = require("express"),
 // Global Variable
 const saltRound = 10;
 
+const { time } = require("console");
 const { request, response } = require("express");
 // InBuilt Module
 const path = require("path");
@@ -220,6 +221,51 @@ app.get(
     }
   }
 );
+
+app.get(
+  "/change/NewAppointment/:title/:id",
+  connectEnsure.ensureLoggedIn({ redirectTo: "/" }),
+  async (request, response) => {
+    try {
+      let AppointmentDetail = await Appoitment.findByPk(request.params.id);
+      let NewTitle = request.params.title;
+      response.render("changeAppointment", {
+        csrfToken: request.csrfToken(),
+        AppointmentDetail,
+        NewTitle,
+      });
+    } catch (error) {
+      console.log("Error:" + error);
+      response.send(error);
+    }
+  }
+);
+
+app.get(
+  "/recommendation/:id/:title",
+  connectEnsure.ensureLoggedIn({ redirectTo: "/" }),
+  async (request, response) => {
+    try {
+      let getAppointment = await Appoitment.findByPk(request.params.id);
+      let allAppointment = await Appoitment.getAppointmentList(
+        request.user.id,
+        getAppointment.Appointment_Date
+      );
+      let timeslot = getTimeSlot(allAppointment, 15);
+      let NewTitle = request.params.title;
+      console.log(timeslot);
+      response.render("Recommend", {
+        csrfToken: request.csrfToken(),
+        getAppointment,
+        timeslot,
+        NewTitle,
+      });
+    } catch (error) {
+      console.log("Error:" + error);
+      response.send(error);
+    }
+  }
+);
 app.get(
   "/Signout",
   connectEnsure.ensureLoggedIn({ redirectTo: "/" }),
@@ -287,10 +333,11 @@ app.post(
     );
 
     let statusStart = true,
-      appointmentTitle;
+      appointmentTitle,
+      appoitmentId;
     // console.log(todayDate == today);
     for (let i = 0; i < getUser.length; i++) {
-      console.log("For LOOP");
+      // console.log("For LOOP");
       // console.log(`${i + 1}:` + request.body.E_Time > getUser[i].Ending);
       if (
         (getUser[i].Starting < request.body.S_Time &&
@@ -299,6 +346,7 @@ app.post(
       ) {
         statusStart = false;
         appointmentTitle = getUser[i].Title;
+        appoitmentId = getUser[i].id;
       }
     }
     try {
@@ -326,7 +374,12 @@ app.post(
           "error",
           `This Time Slot is Occupieded by ${appointmentTitle}`
         );
-        response.redirect("back");
+        response.redirect(
+          `/change/NewAppointment/${request.body.Title.trim().replaceAll(
+            " ",
+            "_"
+          )}/${appoitmentId}`
+        );
       }
     } catch (error) {
       console.log("Erorr:" + error);
@@ -351,6 +404,33 @@ app.post(
     } catch (error) {
       console.log("Error:" + error);
       response.status(402).send(error);
+    }
+  }
+);
+
+app.post(
+  "/CreateNewAppointment/:title/:start/:end/:id",
+  connectEnsure.ensureLoggedIn({ redirectTo: "/" }),
+  async (request, response) => {
+    try {
+      let getDate = await Appoitment.findByPk(request.params.id);
+      console.log(getDate.Appointment_Date);
+      console.log(request.params.title);
+      let NewAppointment = await Appoitment.create({
+        Title: request.params.title.replaceAll("_", " "),
+        Starting: request.params.start,
+        Ending: request.params.end,
+        Status: false,
+        Appointment_Date: getDate.Appointment_Date,
+        userId: request.user.id,
+      });
+      console.log(NewAppointment);
+      request.flash("success", "Created Successfully");
+      // response.redirect("/Login/Home");
+      response.send(NewAppointment ? true : false);
+    } catch (error) {
+      console.log("Error:" + error);
+      response.send(error);
     }
   }
 );
@@ -403,4 +483,91 @@ app.put(
   }
 );
 
+app.put(
+  "/UpdateNewAppointment/:id/:Title",
+  connectEnsure.ensureLoggedIn({ redirectTo: "/" }),
+  async (request, response) => {
+    try {
+      let Appointment = await Appoitment.findByPk(request.params.id);
+      let title = request.params.Title.replaceAll("_", " ");
+      let update = await Appointment.UpdateTitle(title, request.params.id);
+      console.log(update);
+      if (update ? true : false) {
+        request.flash("success", "Successfully Updated");
+      }
+      return response.send(update ? true : false);
+    } catch (error) {
+      console.log("Error:" + error);
+      response.send(error);
+    }
+  }
+);
+
+const getTimeSlot = (Appointment, duration) => {
+  let timeslot, time1, time2, timeStart, timeEnd, status;
+  if (Appointment.length > 1) {
+    for (let i = 0; i < Appointment.length - 1; i++) {
+      timeslot = formatTime(
+        timestrToSec(Appointment[i + 1].Starting) -
+          timestrToSec(Appointment[i].Ending)
+      );
+      console.log(timeslot);
+      if (timeslot.split(":")[1] > duration) {
+        console.log(timeslot);
+        status = true;
+        time1 = Appointment[i + 1].Starting;
+        time2 = `00:01:00`;
+        timeEnd = formatTime(timestrToSec(time1) - timestrToSec(time2));
+        console.log(timeEnd);
+        time1 = Appointment[i].Ending;
+        time2 = "00:01:00";
+        timeStart = formatTime(timestrToSec(time1) + timestrToSec(time2));
+        console.log(timeStart);
+        return { timeStart, timeEnd };
+      }
+    }
+    if (!status) {
+      time1 = Appointment[Appointment.length - 1].Ending;
+      time2 = `00:${duration}:00`;
+      timeEnd = formatTime(timestrToSec(time1) + timestrToSec(time2));
+      console.log(timeEnd);
+      time1 = Appointment[Appointment.length - 1].Ending;
+      time2 = "00:01:00";
+      timeStart = formatTime(timestrToSec(time1) + timestrToSec(time2));
+      console.log(timeStart);
+      return { timeStart, timeEnd };
+    }
+  } else {
+    time1 = Appointment[0].Ending;
+    time2 = `00:${duration}:00`;
+    timeEnd = formatTime(timestrToSec(time1) + timestrToSec(time2));
+    console.log(timeEnd);
+    time1 = Appointment[0].Ending;
+    time2 = "00:01:00";
+    timeStart = formatTime(timestrToSec(time1) + timestrToSec(time2));
+    console.log(timeStart);
+    return { timeStart, timeEnd };
+  }
+};
+
+function timestrToSec(timestr) {
+  var parts = timestr.split(":");
+  return parts[0] * 3600 + parts[1] * 60 + +parts[2];
+}
+
+function pad(num) {
+  if (num < 10) {
+    return "0" + num;
+  } else {
+    return "" + num;
+  }
+}
+
+function formatTime(seconds) {
+  return [
+    pad(Math.floor(seconds / 3600)),
+    pad(Math.floor(seconds / 60) % 60),
+    pad(seconds % 60),
+  ].join(":");
+}
 module.exports = app;
