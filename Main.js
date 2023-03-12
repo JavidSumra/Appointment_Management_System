@@ -1,5 +1,6 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-undef */
+
 //Importing Dependencies Which is Used With in Project
 const express = require("express"),
   app = express(),
@@ -17,13 +18,13 @@ const express = require("express"),
 // Global Variable
 const saltRound = 10;
 
-const { time } = require("console");
-const { request, response } = require("express");
+
 // InBuilt Module
 const path = require("path");
 
+
 // Modules
-const { sequelize } = require("./models"),
+const  sequelize  = require("./models"),
   DataTypes = require("sequelize");
 
 const User = require("./models/user")(sequelize, DataTypes),
@@ -266,6 +267,16 @@ app.get(
     }
   }
 );
+
+app.get("/User/Forgotpass", (request, response) => {
+  try {
+    response.render("ForgotPass", { csrfToken: request.csrfToken() });
+  } catch (error) {
+    console.log("Error:" + error);
+    response.send(error);
+  }
+});
+
 app.get(
   "/Signout",
   connectEnsure.ensureLoggedIn({ redirectTo: "/" }),
@@ -284,28 +295,39 @@ app.get(
     }
   }
 );
+
+app.get("*", (request, response) => {
+  response.render("error", { csrfToken: request.csrfToken() });
+});
+
 // Post Request
 app.post("/SignUpUser", async (request, response) => {
-  try {
-    console.log(request.body);
-    const HashPassword = await bcrypt.hash(request.body.password, saltRound);
-    let UserDetail = await User.create({
-      firstName: request.body.fname,
-      email: request.body.email,
-      password: HashPassword,
-    });
-    console.log(UserDetail);
-    request.flash("success", "User Created Successfully");
-    request.login(UserDetail, (err) => {
-      if (err) {
-        console.log(err);
-      }
-      request.flash("success", "User Suceessfully Created");
-      return response.redirect("/Login/Home");
-    });
-  } catch (error) {
-    console.log(error);
-    response.status(402).send(error);
+  let finduser = await User.getUser(request.body.email);
+  if (finduser) {
+    request.flash("error", "User Already Exist");
+    response.redirect("back");
+  } else {
+    try {
+      console.log(request.body);
+      const HashPassword = await bcrypt.hash(request.body.password, saltRound);
+      let UserDetail = await User.create({
+        firstName: request.body.fname,
+        email: request.body.email,
+        password: HashPassword,
+      });
+      console.log(UserDetail);
+      request.flash("success", "User Created Successfully");
+      request.login(UserDetail, (err) => {
+        if (err) {
+          console.log(err);
+        }
+        request.flash("success", "User Suceessfully Created");
+        return response.redirect("/Login/Home");
+      });
+    } catch (error) {
+      console.log(error);
+      response.status(402).send(error);
+    }
   }
 });
 
@@ -353,17 +375,22 @@ app.post(
       // console.log(statusStart);
       if (statusStart) {
         if (request.body.E_Time > request.body.S_Time) {
-          let addNewAppointment = await Appoitment.create({
-            Title: request.body.Title.trim(),
-            userId: request.user.id,
-            Starting: request.body.S_Time,
-            Ending: request.body.E_Time,
-            Status: false,
-            Appointment_Date: todayDate,
-          });
-          console.log(addNewAppointment);
-          request.flash("success", "Created Successfully");
-          response.redirect("/Login/Home");
+          if (request.body.Title.trim().lenght > 4) {
+            let addNewAppointment = await Appoitment.create({
+              Title: request.body.Title.trim(),
+              userId: request.user.id,
+              Starting: request.body.S_Time,
+              Ending: request.body.E_Time,
+              Status: false,
+              Appointment_Date: todayDate,
+            });
+            console.log(addNewAppointment);
+            request.flash("success", "Created Successfully");
+            response.redirect("/Login/Home");
+          } else {
+            request.flash("error", "Title Lenght Must Greater Than 4");
+            response.redirect("back");
+          }
         } else {
           console.log("Not Executed");
           request.flash("error", "Please Enter Valid Time");
@@ -388,6 +415,28 @@ app.post(
   }
 );
 
+app.post("/Forgotpass", async (request, response) => {
+  try {
+    if (request.body.password === request.body.conpassword) {
+      let userDetail = await User.getUser(request.body.email);
+      if (userDetail) {
+        let hashPass = await bcrypt.hash(request.body.password, saltRound);
+        await userDetail.updatePass(hashPass);
+        request.flash("success", "Password Updated Successfully");
+        response.redirect("/");
+      } else {
+        request.flash("error", "User Not Exist");
+        response.redirect("back");
+      }
+    } else {
+      request.flash("error", "Password Not Match");
+      response.redirect("back");
+    }
+  } catch (error) {
+    console.log("Error:" + error);
+    response.send(error);
+  }
+});
 app.post(
   "/modify/Appointment/:id",
   connectEnsure.ensureLoggedIn({ redirectTo: "/" }),
