@@ -14,7 +14,7 @@ const flash = require("connect-flash");
 const session = require("express-session");
 const csrf = require("tiny-csrf");
 const bcrypt = require("bcrypt");
-// const sequelize = require("sequelize");
+const sequelize = require("sequelize");
 // Global Variable
 const saltRound = 10;
 
@@ -22,7 +22,7 @@ const saltRound = 10;
 const path = require("path");
 
 // Modules
-const sequelize = require("./models");
+// const sequelize = require("./models");
 const DataTypes = require("sequelize");
 
 const User = require("./models/user")(sequelize, DataTypes);
