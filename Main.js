@@ -372,7 +372,7 @@ app.post(
       // console.log(statusStart);
       if (statusStart) {
         if (request.body.E_Time > request.body.S_Time) {
-          if (request.body.Title.trim().lenght > 4) {
+          if (request.body.Title.trim().length > 4) {
             let addNewAppointment = await Appoitment.create({
               Title: request.body.Title.trim(),
               userId: request.user.id,
