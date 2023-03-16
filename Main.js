@@ -394,15 +394,13 @@ app.post(
           response.redirect("back");
         }
       } else {
+   let newTitle = request.body.Title.replaceAll(" ","_");
         request.flash(
           "error",
           `This Time Slot is Occupieded by ${appointmentTitle}`
         );
         response.redirect(
-          `/change/NewAppointment/${request.body.Title.trim().replaceAll(
-            " ",
-            "_"
-          )}/${appoitmentId}`
+          `/change/NewAppointment/${newTitle}/${appoitmentId}`
         );
       }
     } catch (error) {
