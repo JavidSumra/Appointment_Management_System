@@ -461,7 +461,7 @@ app.post(
       console.log(getDate.Appointment_Date);
       console.log(request.params.title);
       let NewAppointment = await Appoitment.create({
-        Title: request.params.title.replaceAll("_", " "),
+        Title: request.params.title,
         Starting: request.params.start,
         Ending: request.params.end,
         Status: false,
