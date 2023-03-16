@@ -394,7 +394,7 @@ app.post(
           response.redirect("back");
         }
       } else {
-   let newTitle = request.body.Title.replaceAll(" ","_");
+   let newTitle = request.body.Title;
         request.flash(
           "error",
           `This Time Slot is Occupieded by ${appointmentTitle}`
