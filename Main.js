@@ -1,55 +1,60 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-undef */
+"use strict";
+
 //Importing Dependencies Which is Used With in Project
+
 const express = require("express"),
   app = express(),
-  ejs = require("ejs"),
-  bodyparser = require("body-parser"),
-  cookieparser = require("cookie-parser"),
-  passport = require("passport"),
-  LocalStrategy = require("passport-local"),
-  connectEnsure = require("connect-ensure-login"),
+  csrf = require("tiny-csrf"),
+  cookiepasrser = require("cookie-parser"),
+  bodyParser = require("body-parser"),
   flash = require("connect-flash"),
   session = require("express-session"),
-  csrf = require("tiny-csrf"),
   bcrypt = require("bcrypt");
 
-// Global Variable
 const saltRound = 10;
 
-// InBuilt Module
+// Passport For Authentication
+const passport = require("passport");
+const LocalStrategy = require("passport-local");
+const connectEnsure = require("connect-ensure-login");
+
 const path = require("path");
 
-// Modules
-const { sequelize } = require("./models"),
-  DataTypes = require("sequelize");
-
-const User = require("./models/user")(sequelize, DataTypes),
-  Appoitment = require("./models/appoitment")(sequelize, DataTypes);
-
-// Setup View Engine And Path of Views
-app.set("view engine", "ejs");
+//Set View Engine
 app.set("views", path.join(__dirname + "/views"));
+app.set("view engine", "ejs");
 
-app.use(flash());
+const { sequelize } = require("./models");
+const { DataTypes } = require("sequelize");
 
+//Models
+let User = require("./models/user")(sequelize, DataTypes);
+let Appoitment = require("./models/appoitment")(sequelize, DataTypes);
+
+app.use(bodyParser.json());
+app.use(express.json());
+
+app.use(express.urlencoded({ extended: false }));
+app.use(cookiepasrser("cookie-parser-secret"));
+
+// Session
 app.use(
   session({
-    secret: "This_is_Super_Secret_Key_2021095900025026",
+    secret: "this_should_be_32_character_long",
     cookie: {
       maxAge: 60 * 60 * 24 * 1000, //24 Hours
     },
   })
 );
 
-// To Authenticate User I use Passport libraby
-app.use(passport.initialize());
-
-// Middleware
-app.use(bodyparser.json());
-app.use(express.urlencoded({ extended: false }));
-app.use(cookieparser("This_is_My_Secret_String"));
 app.use(csrf("this_should_be_32_character_long", ["POST", "PUT", "DELETE"]));
+
+//Flash Message
+app.use(flash());
+
+app.use(passport.initialize());
 app.use(passport.session());
 
 passport.use(
@@ -106,15 +111,11 @@ app.use(function (request, response, next) {
 });
 
 let today = new Date().toLocaleDateString("en-In");
-// Get Request
+
+//! Get Request
 app.get("/", (request, response) => {
   try {
-    // console.log(request.session.passport);
-    if (request.session.passport) {
-      response.redirect("/Login/Home");
-    } else {
-      response.render("Login", { csrfToken: request.csrfToken() });
-    }
+    response.render("Login", { csrfToken: request.csrfToken() });
   } catch (error) {
     console.log("Error:" + error);
     response.status(402).send(error);
@@ -249,7 +250,7 @@ app.get(
         request.user.id,
         getAppointment.Appointment_Date
       );
-      let timeslot = getTimeSlot(allAppointment, 15);
+      let timeslot = getTimeSlot(allAppointment, 15); //For Default 15min Duration
       let NewTitle = request.params.title;
       console.log(timeslot);
       response.render("Recommend", {
@@ -297,9 +298,13 @@ app.get("*", (request, response) => {
   response.render("error", { csrfToken: request.csrfToken() });
 });
 
-// Post Request
+//! Post Request
 app.post("/SignUpUser", async (request, response) => {
   let finduser = await User.getUser(request.body.email);
+  // console.log(request.csrfToken());
+  // console.log(request.body._csrf);
+  // if (!request.csrfToken() || request.csrfToken() != request.body._csrf) {
+  // }
   if (finduser) {
     request.flash("error", "User Already Exist");
     response.redirect("back");
@@ -354,10 +359,7 @@ app.post(
     let statusStart = true,
       appointmentTitle,
       appoitmentId;
-    // console.log(todayDate == today);
     for (let i = 0; i < getUser.length; i++) {
-      // console.log("For LOOP");
-      // console.log(`${i + 1}:` + request.body.E_Time > getUser[i].Ending);
       if (
         (getUser[i].Starting < request.body.S_Time &&
           request.body.S_Time < getUser[i].Ending) ||
@@ -369,10 +371,9 @@ app.post(
       }
     }
     try {
-      // console.log(statusStart);
       if (statusStart) {
         if (request.body.E_Time > request.body.S_Time) {
-          if (request.body.Title.trim().lenght > 4) {
+          if (request.body.Title.trim().length > 4) {
             let addNewAppointment = await Appoitment.create({
               Title: request.body.Title.trim(),
               userId: request.user.id,
@@ -385,7 +386,7 @@ app.post(
             request.flash("success", "Created Successfully");
             response.redirect("/Login/Home");
           } else {
-            request.flash("error", "Title Lenght Must Greater Than 4");
+            request.flash("error", "Title Length Must Greater Than 4");
             response.redirect("back");
           }
         } else {
@@ -399,10 +400,7 @@ app.post(
           `This Time Slot is Occupieded by ${appointmentTitle}`
         );
         response.redirect(
-          `/change/NewAppointment/${request.body.Title.trim().replaceAll(
-            " ",
-            "_"
-          )}/${appoitmentId}`
+          `/change/NewAppointment/${request.body.Title}/${appoitmentId}`
         );
       }
     } catch (error) {
@@ -463,7 +461,7 @@ app.post(
       console.log(getDate.Appointment_Date);
       console.log(request.params.title);
       let NewAppointment = await Appoitment.create({
-        Title: request.params.title.replaceAll("_", " "),
+        Title: request.params.title,
         Starting: request.params.start,
         Ending: request.params.end,
         Status: false,
@@ -480,7 +478,7 @@ app.post(
     }
   }
 );
-// Delete Request
+//! Delete Request
 
 app.delete(
   "/Appointment/Delete/:id",
@@ -505,7 +503,7 @@ app.delete(
   }
 );
 
-// Put Request
+//! Put Request
 
 app.put(
   "/Update/Appointment/:id",
@@ -549,6 +547,8 @@ app.put(
   }
 );
 
+//! Function Definition
+
 const getTimeSlot = (Appointment, duration) => {
   let timeslot, time1, time2, timeStart, timeEnd, status;
   if (Appointment.length > 1) {
@@ -558,15 +558,15 @@ const getTimeSlot = (Appointment, duration) => {
           timestrToSec(Appointment[i].Ending)
       );
       console.log(timeslot);
-      if (timeslot.split(":")[1] > duration) {
+      if (timestrToSec(timeslot) > timestrToSec(`00:${duration}`)) {
         console.log(timeslot);
         status = true;
         time1 = Appointment[i + 1].Starting;
-        time2 = `00:01:00`;
+        time2 = `00:01`;
         timeEnd = formatTime(timestrToSec(time1) - timestrToSec(time2));
         console.log(timeEnd);
         time1 = Appointment[i].Ending;
-        time2 = "00:01:00";
+        time2 = "00:01";
         timeStart = formatTime(timestrToSec(time1) + timestrToSec(time2));
         console.log(timeStart);
         return { timeStart, timeEnd };
@@ -574,22 +574,22 @@ const getTimeSlot = (Appointment, duration) => {
     }
     if (!status) {
       time1 = Appointment[Appointment.length - 1].Ending;
-      time2 = `00:${duration}:00`;
+      time2 = `00:${duration}`;
       timeEnd = formatTime(timestrToSec(time1) + timestrToSec(time2));
       console.log(timeEnd);
       time1 = Appointment[Appointment.length - 1].Ending;
-      time2 = "00:01:00";
+      time2 = "00:01";
       timeStart = formatTime(timestrToSec(time1) + timestrToSec(time2));
       console.log(timeStart);
       return { timeStart, timeEnd };
     }
   } else {
     time1 = Appointment[0].Ending;
-    time2 = `00:${duration}:00`;
+    time2 = `00:${duration}`;
     timeEnd = formatTime(timestrToSec(time1) + timestrToSec(time2));
     console.log(timeEnd);
     time1 = Appointment[0].Ending;
-    time2 = "00:01:00";
+    time2 = "00:01";
     timeStart = formatTime(timestrToSec(time1) + timestrToSec(time2));
     console.log(timeStart);
     return { timeStart, timeEnd };
@@ -598,7 +598,7 @@ const getTimeSlot = (Appointment, duration) => {
 
 function timestrToSec(timestr) {
   var parts = timestr.split(":");
-  return parts[0] * 3600 + parts[1] * 60 + +parts[2];
+  return parts[0] * 3600 + parts[1] * 60;
 }
 
 function pad(num) {
@@ -613,7 +613,6 @@ function formatTime(seconds) {
   return [
     pad(Math.floor(seconds / 3600)),
     pad(Math.floor(seconds / 60) % 60),
-    pad(seconds % 60),
   ].join(":");
 }
 module.exports = app;

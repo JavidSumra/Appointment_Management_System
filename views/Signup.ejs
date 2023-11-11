@@ -61,8 +61,8 @@
               action="/SignUpUser"
               method="post"
             >
+              <input type="hidden" name="_csrf" value="<%=csrfToken%>" />
               <div>
-                <input type="hidden" name="_csrf" value="<%= csrfToken%>" />
                 <label
                   for="fname"
                   class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
