@@ -401,11 +401,7 @@ app.post(
           `This Time Slot is Occupieded by ${appointmentTitle}`
         );
         response.redirect(
-<<<<<<< HEAD
-          `/change/NewAppointment/${request.body.Title}/${appoitmentId}`
-=======
           `/change/NewAppointment/${newTitle}/${appoitmentId}`
->>>>>>> 03894f2d594e3d5cc88fe47e1d518da989828870
         );
       }
     } catch (error) {
